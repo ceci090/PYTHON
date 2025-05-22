@@ -1,24 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask
+from config import Config
+from models import db
+from routes import routes
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# Ruta GET simple
-@app.route('/saludo', methods=['GET'])
-def saludo():
-    return jsonify({"mensaje": "¡Hola desde tu API en Python!"})
+db.init_app(app)
+app.register_blueprint(routes)
 
-# Ruta POST que recibe JSON y suma dos números
-@app.route('/sumar', methods=['POST'])
-def sumar():
-    datos = request.get_json()
-    a = datos.get('a')
-    b = datos.get('b')
-    
-    if a is None or b is None:
-        return jsonify({"error": "Faltan parámetros 'a' y 'b'"}), 400
-
-    resultado = a + b
-    return jsonify({"resultado": resultado})
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True)
